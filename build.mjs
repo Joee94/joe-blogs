@@ -25,7 +25,7 @@ const getPreviewHTML = ({
                     <p>${subtitle}</p>
                     <p>${date}</p>
                 </header>
-                <img src="/public/${image}" alt=${imageAlt}>
+                <img src="public/${image}" alt=${imageAlt}>
               </a>
           </article>
       </li>`;
