@@ -1,6 +1,6 @@
 {
   "watch": ["*"],
   "ignore": ["build"],
-  "ext": "js,html,css,md",
+  "ext": "js,html,css,md,mjs",
   "exec": "yarn build"
 }

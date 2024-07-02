@@ -8,7 +8,14 @@ const postsDir = "./posts";
 const buildDir = "./build";
 const filesToCopy = ["./index.css", "./index.js"];
 
-const getPreviewHTML = ({ filePath, title, subtitle, date }) => {
+const getPreviewHTML = ({
+  filePath,
+  title,
+  subtitle,
+  image,
+  imageAlt,
+  date,
+}) => {
   return `
       <li>
           <article>
@@ -18,10 +25,7 @@ const getPreviewHTML = ({ filePath, title, subtitle, date }) => {
                     <p>${subtitle}</p>
                     <p>${date}</p>
                 </header>
-                <figure>
-                    <img src="path/to/image1.jpg" alt="Description of image 1">
-                    <figcaption>Optional caption for the image</figcaption>
-                </figure>
+                <img src="/public/${image}" alt=${imageAlt}>
               </a>
           </article>
       </li>`;
@@ -36,6 +40,8 @@ const processMarkdownFiles = async () => {
     // Create the build directory
     await fs.mkdir(buildDir, { recursive: true });
     console.log("Directory Created!");
+    await fs.mkdir(path.join(buildDir, "posts"), { recursive: true });
+    console.log("Directory Created!");
 
     // Read files from posts directory
     const files = await fs.readdir(postsDir);
@@ -45,7 +51,7 @@ const processMarkdownFiles = async () => {
     const root = parse(indexHtml);
     const list = root.getElementById("post-list");
 
-    for (const file of files) {
+    for (const file of files.filter((file) => file.includes(".md"))) {
       const filePath = path.join(postsDir, file);
 
       // Read and parse markdown file
@@ -54,14 +60,25 @@ const processMarkdownFiles = async () => {
       const metadata = parsed.data; // Metadata extracted from the front matter
       const content = parsed.content; // Markdown content without the front matter
       const html = marked.parse(content);
-      const htmlFilePath = path.join(buildDir, `${path.parse(file).name}.html`);
+      const htmlFilePath = path.join(
+        buildDir,
+        "posts",
+        `${path.parse(file).name}.html`
+      );
 
       // Write HTML file to build directory
       await fs.writeFile(htmlFilePath, html);
       console.log("The file was saved!");
       console.log(metadata);
       // Append preview HTML to list
-      list.appendChild(parse(getPreviewHTML({ ...metadata, filePath })));
+      list.appendChild(
+        parse(
+          getPreviewHTML({
+            ...metadata,
+            filePath: path.join("posts", `${path.parse(file).name}.html`),
+          })
+        )
+      );
     }
 
     // Write updated index.html to build directory
@@ -73,6 +90,9 @@ const processMarkdownFiles = async () => {
       await fs.copyFile(file, path.join(buildDir, path.basename(file)));
       console.log(file + " copied");
     }
+    await fs.cp("posts/images", path.join(buildDir, "public"), {
+      recursive: true,
+    });
   } catch (err) {
     console.error(err);
   }
