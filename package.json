@@ -1,0 +1,12 @@
+{
+  "name": "joe-blogs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "node ./build.mjs"
+  },
+  "devDependencies": {
+    "marked": "^13.0.1"
+  }
+}
