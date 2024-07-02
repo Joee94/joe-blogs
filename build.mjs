@@ -1,4 +1,5 @@
 import { marked } from "marked";
+import matter from "gray-matter";
 import fs from "fs/promises";
 import path from "path";
 import { parse } from "node-html-parser";
@@ -7,22 +8,23 @@ const postsDir = "./posts";
 const buildDir = "./build";
 const filesToCopy = ["./index.css", "./index.js"];
 
-const getPreviewHTML = ({ filePath, firstHeading, secondHeading }) => {
+const getPreviewHTML = ({ filePath, title, subtitle, date }) => {
   return `
-<li>
-    <article>
-      <a href="${filePath}">
-          <header>
-              <h2>${firstHeading}</h2>
-              <p>${secondHeading}</p>
-          </header>
-          <figure>
-              <img src="path/to/image1.jpg" alt="Description of image 1">
-              <figcaption>Optional caption for the image</figcaption>
-          </figure>
-        </a>
-    </article>
-</li>`;
+      <li>
+          <article>
+            <a href="${filePath}">
+                <header>
+                    <h2>${title}</h2>
+                    <p>${subtitle}</p>
+                    <p>${date}</p>
+                </header>
+                <figure>
+                    <img src="path/to/image1.jpg" alt="Description of image 1">
+                    <figcaption>Optional caption for the image</figcaption>
+                </figure>
+              </a>
+          </article>
+      </li>`;
 };
 
 const processMarkdownFiles = async () => {
@@ -48,25 +50,18 @@ const processMarkdownFiles = async () => {
 
       // Read and parse markdown file
       const postMd = await fs.readFile(filePath, { encoding: "utf-8" });
-      const html = marked.parse(postMd);
+      const parsed = matter(postMd);
+      const metadata = parsed.data; // Metadata extracted from the front matter
+      const content = parsed.content; // Markdown content without the front matter
+      const html = marked.parse(content);
       const htmlFilePath = path.join(buildDir, `${path.parse(file).name}.html`);
 
       // Write HTML file to build directory
       await fs.writeFile(htmlFilePath, html);
       console.log("The file was saved!");
-
-      const tokens = marked.lexer(postMd);
-      const firstHeading =
-        tokens.find((token) => token.type === "heading" && token.depth === 1)
-          ?.text || "";
-      const secondHeading =
-        tokens.find((token) => token.type === "heading" && token.depth === 2)
-          ?.text || "";
-
+      console.log(metadata);
       // Append preview HTML to list
-      list.appendChild(
-        parse(getPreviewHTML({ firstHeading, secondHeading, filePath }))
-      );
+      list.appendChild(parse(getPreviewHTML({ ...metadata, filePath })));
     }
 
     // Write updated index.html to build directory

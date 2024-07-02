@@ -9,6 +9,7 @@
     "dev": "yarn serve & nodemon"
   },
   "devDependencies": {
+    "gray-matter": "^4.0.3",
     "marked": "^13.0.1",
     "node-html-parser": "^6.1.13",
     "nodemon": "^3.1.4"
