@@ -4,6 +4,8 @@ import path from "path";
 const postsDir = "./posts";
 const buildDir = "./build";
 
+const filesToCopy = ["./index.html", "./index.css", "./index.js"];
+
 fs.rm(buildDir, { recursive: true }, (err) => {
   if (err) {
     console.log(err);
@@ -31,6 +33,14 @@ fs.rm(buildDir, { recursive: true }, (err) => {
             console.log("The file was saved!");
           });
         });
+      });
+    });
+
+    filesToCopy.forEach((file) => {
+      fs.copyFile(file, path.join(buildDir, file), (err) => {
+        if (err) {
+          return console.log(err);
+        }
       });
     });
   });
